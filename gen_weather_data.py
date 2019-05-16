@@ -8,16 +8,6 @@ import time
 import datetime,calendar
 import sys, os, glob
 
-"""
-Sample reference for atmospheric pressure range and himidity range
-https://en.wikipedia.org/wiki/Atmospheric_pressure(lowest:870hpa, highest:1050hpa)
-https://www.chicagotribune.com/news/ct-xpm-2011-12-16-ct-wea-1216-asktom-20111216-story.html
-Pressure range: {700 - 1100} 
-Humidity range(%): {1-100}
-For country cities database details refer to below link:
-https://simplemaps.com/data/au-cities
-
-"""
 
 ## Generate Random Datetime for a given Date Range
 def strTimeProp(start, end, format, prop):
@@ -101,10 +91,10 @@ if option=='1':
                     condition = "Rain"
                     Temperature = '+'+str(Temperature)
                 else:
-                    condition = "Sunny"
-                    Temperature = '+'+str(Temperature)
+                   condition = "Sunny"
+                   Temperature = '+'+str(Temperature)
                     
-                geo = City + "|" + str(Lat) + "," + str(Lon) + "," + str(elevation)+ "|" 
+                geo = City + "|" + str(round(float(Lat),2)) + "," + str(round(float(Lon),2)) + "," + str(elevation)+ "|" 
                 weather_dtl = str(Temperature) + "|" + condition + "|" + Local_Time + "|" + str(pressure) + "|" + str(humidity)
                 #print(City,str(Lat),str(Lon),elevation,,Temperature,condition,Local_Time,ph)  
                 weather_data.write(geo+weather_dtl+"\n")
@@ -138,8 +128,8 @@ elif option=='2':
     # Project all longitudes, latitudes
     p2 = Proj(proj='latlong', datum='WGS84')
     longs, lats = transform(p1, p2, eastings, northings)
-
-    weather_data = open(img_file+"_weather_data.dat", "w") 
+    image_flname=img_file.split(".")[0]
+    weather_data = open(image_flname+"_weather_data.dat", "w") 
 
     # Sample data is generate in a sequential process. TODO: Need to parallelize the process
     for r in range(0, len(longs)):
@@ -147,39 +137,35 @@ elif option=='2':
         s_lats = lats[r]
 
         for i in range(0, len(s_long)):
-                latitude = str(round(s_lats[i],2))
-                longitude = str(round(s_long[i],2))
-                city_dtl = requests.get('https://maps.googleapis.com/maps/api/geocode/json?latlng='+latitude+','+longitude+'&key=AIzaSyCBekjUKiXYLaY0J7J3zurI7gksVGicBBA') 
-                geocity = city_dtl.json()['results'][0]['address_components'][0]['long_name']
-                e_dtl = requests.get('https://maps.googleapis.com/maps/api/elevation/json?locations='+latitude+','+longitude+'&key=AIzaSyCBekjUKiXYLaY0J7J3zurI7gksVGicBBA')
-                elevation=round(e_dtl.json()['results'][0]['elevation'])
-                Local_Time = strTimeProp( datetime.datetime.strptime(dmin,dfrmt.rstrip("\r\n")).strftime("%Y-%m-%d %H:%M:%S"),
-                                      datetime.datetime.strptime(dmax,dfrmt.rstrip("\r\n")).strftime("%Y-%m-%d %H:%M:%S")
-                                      ,'%Y-%m-%d %H:%M:%S', random.random())
-                
-                lcl_mnth = Local_Time.split('-')[1]
-                for season_dtl,season_dtl_info in season_conditions.items():
-                  if lcl_mnth in season_dtl_info["month"]:
-                    (tmin1,tmax1) = season_dtl_info["temp"]
+	        Local_Time = strTimeProp(datetime.datetime.strptime(dmin,dfrmt.rstrip("\r\n")).strftime("%Y-%m-%d %H:%M:%S"),datetime.datetime.strptime(dmax,dfrmt.rstrip("\r\n")).strftime("%Y-%m-%d %H:%M:%S"),'%Y-%m-%d %H:%M:%S',random.random())
+	        lcl_mnth = int(Local_Time.split('-')[1])
+	        for season_dtl,season_dtl_info in season_conditions.items():
+	           if lcl_mnth in season_dtl_info["month"]:
+	             (tmin,tmax) = season_dtl_info["temp"]
+	        Temperature = round(random.uniform(tmin,tmax),1)
+	        pressure,humidity = round(random.uniform(pmin,pmax),1),random.randrange(hmax,hmin,-1)
+	        latitude = str(round(s_lats[i],2))
+	        longitude = str(round(s_long[i],2))
+	        city_dtl = requests.get('https://maps.googleapis.com/maps/api/geocode/json?latlng='+latitude+','+longitude+'&key=AIzaSyCBekjUKiXYLaY0J7J3zurI7gksVGicBBA') 
+	        geocity = city_dtl.json()['results'][0]['address_components'][0]['long_name']
+	        e_dtl = requests.get('https://maps.googleapis.com/maps/api/elevation/json?locations='+latitude+','+longitude+'&key=AIzaSyCBekjUKiXYLaY0J7J3zurI7gksVGicBBA')
+	        elevation=round(e_dtl.json()['results'][0]['elevation'])
                     
-                pressure,humidity = round(random.uniform(pmin,pmax),1),random.randrange(hmax,hmin,-1)
-                
-                Temperature = round(random.uniform(20,40),1) 
-                
                 ## Logic for Weather condition
-                if Temperature < 0:
-                    condition = "Snow"
-                elif Temperature > 0.0 and pressure >= 700 and pressure <= 1000 and humidity >= 70:
-                    condition = "Rain"
-                    Temperature = '+'+str(Temperature)
-                else:
-                    condition = "Sunny"
-                    Temperature = '+'+str(Temperature)
+	        if Temperature < 0:
+	            condition = "Snow"
+	        elif Temperature > 0.0 and pressure >= 700 and pressure <= 1000 and humidity >= 70:
+	            condition = "Rain"
+	            Temperature = '+'+str(Temperature)
+	        else:
+	            condition = "Sunny"
+	            Temperature = '+'+str(Temperature)
                     
-                geo = str(geocity) + "|" + latitude + "," + longitude + "," + str(elevation)+ "|" 
-                weather_dtl = str(Temperature) + "|" + condition + "|" + Local_Time + "|" + str(pressure) + "|" + str(humidity)
-                weather_data.write(geo+weather_dtl+"\n")
+	        geo = str(geocity) + "|" + latitude + "," + longitude + "," + str(elevation)+ "|" 
+	        weather_dtl = str(Temperature) + "|" + condition + "|" + Local_Time + "|" + str(pressure) + "|" + str(humidity)
+	        weather_data.write(geo+weather_dtl+"\n")
     weather_data.close()
+    print("\n Completed writing weather data to file "+image_flname+"_weather_data.dat")
 else:
     print("Invalid option selected. Exiting application...")
     sys.exit()
