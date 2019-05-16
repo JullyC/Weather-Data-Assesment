@@ -5,6 +5,7 @@ from pyproj import Proj, transform
 import requests
 import random
 import time
+import datetime,calendar
 import sys, os, glob
 
 """
@@ -57,6 +58,9 @@ if option=='1':
       sys.exit()
       
     path = input("\n Please provide path of Country Database:")
+    if len(glob.glob(path+country+"/*.csv")) == 0:
+        print("No files to process. Exiting application..")
+        sys.exit()
     ## Obtain the list of cities for the country  
     weather_data = open("weather_data_"+country+"_"+year+".dat", "w")
     
@@ -79,7 +83,7 @@ if option=='1':
                 Lat = line.split(",")[1]
                 Lon = line.split(",")[2]
                 e_dtl = requests.get('https://maps.googleapis.com/maps/api/elevation/json?locations='+Lat+','+Lon+'&key=AIzaSyCBekjUKiXYLaY0J7J3zurI7gksVGicBBA')
-                elevation=e_dtl.json()['results'][0]['elevation']                
+                elevation=round(e_dtl.json()['results'][0]['elevation']) 
                 
                 ## Randomly generating pressure and humidity with pre-defined range  
                 pressure,humidity = round(random.uniform(pmin,pmax),1),random.randrange(hmax,hmin,-1)
@@ -88,7 +92,7 @@ if option=='1':
                                          datetime.datetime(int(year), i, days,23,59,59).strftime("%Y-%m-%d %H:%M:%S"),
                                          '%Y-%m-%d %H:%M:%S',random.random())
                
-                Temperature = round(random.uniform(tmax,tmin),1) 
+                Temperature = round(random.uniform(tmin,tmax),1) 
                 
                 ## Logic for Weather condition
                 if Temperature < 0:
@@ -107,7 +111,7 @@ if option=='1':
     weather_data.close()
     print("\n Completed writing weather data to file weather_data_"+country+"_"+year+".dat")
 elif option=='2':
-  path = input("Please provide path for the TIFF files")
+  path = input("Please provide path for the TIFF files: ")
   if len(glob.glob(path+"*.tif")) == 0:
     print("No files to process. Exiting application..")
     sys.exit()
@@ -116,9 +120,9 @@ elif option=='2':
   for img_file in glob.glob(path+"*.tif"):
     # Read raster
     with rasterio.open(img_file) as r:
-        T0 = r.affine  # upper-left pixel corner affine transform
+        T0 = r.transform  # upper-left pixel corner affine transform
         p1 = Proj(r.crs)
-        A = r.read_band(1)  # pixel values
+        A = r.read(1)  # pixel values
 
     # All rows and columns
     cols, rows = np.meshgrid(np.arange(A.shape[1]), np.arange(A.shape[0]))
@@ -143,11 +147,12 @@ elif option=='2':
         s_lats = lats[r]
 
         for i in range(0, len(s_long)):
-            
-                #r = requests.get('http://iatageo.com/getCode/' + str(s_lats[i]) + '/' + str(s_long[i]))
-                #geocity = r.json()['IATA']
-                geocity = "MEL"
-                elevation = 39
+                latitude = str(round(s_lats[i],2))
+                longitude = str(round(s_long[i],2))
+                city_dtl = requests.get('https://maps.googleapis.com/maps/api/geocode/json?latlng='+latitude+','+longitude+'&key=AIzaSyCBekjUKiXYLaY0J7J3zurI7gksVGicBBA') 
+                geocity = city_dtl.json()['results'][0]['address_components'][0]['long_name']
+                e_dtl = requests.get('https://maps.googleapis.com/maps/api/elevation/json?locations='+latitude+','+longitude+'&key=AIzaSyCBekjUKiXYLaY0J7J3zurI7gksVGicBBA')
+                elevation=round(e_dtl.json()['results'][0]['elevation'])
                 Local_Time = strTimeProp( datetime.datetime.strptime(dmin,dfrmt.rstrip("\r\n")).strftime("%Y-%m-%d %H:%M:%S"),
                                       datetime.datetime.strptime(dmax,dfrmt.rstrip("\r\n")).strftime("%Y-%m-%d %H:%M:%S")
                                       ,'%Y-%m-%d %H:%M:%S', random.random())
@@ -155,11 +160,11 @@ elif option=='2':
                 lcl_mnth = Local_Time.split('-')[1]
                 for season_dtl,season_dtl_info in season_conditions.items():
                   if lcl_mnth in season_dtl_info["month"]:
-                    (tmin,tmax) = season_dtl_info["temp"]
+                    (tmin1,tmax1) = season_dtl_info["temp"]
                     
                 pressure,humidity = round(random.uniform(pmin,pmax),1),random.randrange(hmax,hmin,-1)
                 
-                Temperature = round(random.uniform(tmax,tmin),1) 
+                Temperature = round(random.uniform(20,40),1) 
                 
                 ## Logic for Weather condition
                 if Temperature < 0:
@@ -171,12 +176,12 @@ elif option=='2':
                     condition = "Sunny"
                     Temperature = '+'+str(Temperature)
                     
-                geo = str(geocity) + "|" + str(Lat) + "," + str(Lon) + "," + str(elevation)+ "|" 
+                geo = str(geocity) + "|" + latitude + "," + longitude + "," + str(elevation)+ "|" 
                 weather_dtl = str(Temperature) + "|" + condition + "|" + Local_Time + "|" + str(pressure) + "|" + str(humidity)
-                #print(City,str(Lat),str(Lon),elevation,,Temperature,condition,Local_Time,ph)  
                 weather_data.write(geo+weather_dtl+"\n")
     weather_data.close()
 else:
     print("Invalid option selected. Exiting application...")
     sys.exit()
     
+
