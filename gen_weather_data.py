@@ -51,7 +51,6 @@ if option=='1':
     
     year = input("\n Please provide year {e.g. 2014}:")
     
-    
     if int(year) >= datetime.datetime.now().year: 
       print("The application is built to generate weather data for previous years and not forecast for current or future year")
       print("Existing application..")
@@ -64,24 +63,23 @@ if option=='1':
     with open(glob.glob(path+country+"/*.csv")[0]) as fg:
       next(fg)
       for line in fg:
-               
-          ## Traversing through the months of the specified year      
-          for i in range(1,13):
+            ## Traversing through the months of the specified year      
+            for i in range(1,13):
             
-            ## Obtain Temperature range for a particular month of the year           
-            for season_dtl,season_dtl_info in season_conditions.items():
+             ## Obtain Temperature range for a particular month of the year           
+             for season_dtl,season_dtl_info in season_conditions.items():
                 if i in season_dtl_info["month"]:
                     (tmin,tmax) = season_dtl_info["temp"]
                     
                     
-            ## Traversing through all the days of the specified year       
-            for days in range(1,calendar.monthrange(int(year),i)[1]+1):
-                
+             ## Traversing through all the days of the specified year       
+             for days in range(1,calendar.monthrange(int(year),i)[1]+1):
                 ## Obtain lat,long and elevation for the City
                 City = line.split(",")[0]
                 Lat = line.split(",")[1]
-                Lon = line.split(",")[1]
-                elevation = 39
+                Lon = line.split(",")[2]
+                e_dtl = requests.get('https://maps.googleapis.com/maps/api/elevation/json?locations='+Lat+','+Lon+'&key=AIzaSyCBekjUKiXYLaY0J7J3zurI7gksVGicBBA')
+                elevation=e_dtl.json()['results'][0]['elevation']                
                 
                 ## Randomly generating pressure and humidity with pre-defined range  
                 pressure,humidity = round(random.uniform(pmin,pmax),1),random.randrange(hmax,hmin,-1)
