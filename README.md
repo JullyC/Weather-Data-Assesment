@@ -68,6 +68,8 @@
             1. Temperature generation as per seasons applicable in each 
                country(for e.g. Africa and Singapore does not have winter season)
             2. Aspects  of weather generation excluding Time and geo-location
+            3. For geo-location the location name is limited to Google map location availability(There could be scenarios
+               of no location obtain for a lat,long generated from tif file. CUrrently there is no handling of the same)
 # Parameters : No parameters required
 # Python Version: Python3
 # Execution : python3  gen_weather_data.py
@@ -81,10 +83,14 @@
 # 1.0               Jully               05/16/2019   Initial
 # Test Cases:
               1. Temperature for both segments generating as per Local time(Month--> Season)
+              
                  applicability 
               2. Elevation details from Google API call providing correct details or not
               3. Randomness of the pressure  and humidity as per defined range
               4. Weather condition checks(Snow, Rain, Summer) logic check
               5. Program exit points checks
               6. Loop checks
+# Few records of the execution has been attached in the folder:
+   File name(time):weather_data_Australia_2014.dat
+   File name(geo):cea_weather_data.dat
 ##############################################################################################################################
