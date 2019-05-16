@@ -13,6 +13,9 @@ https://en.wikipedia.org/wiki/Atmospheric_pressure(lowest:870hpa, highest:1050hp
 https://www.chicagotribune.com/news/ct-xpm-2011-12-16-ct-wea-1216-asktom-20111216-story.html
 Pressure range: {700 - 1100} 
 Humidity range(%): {1-100}
+For country cities database details refer to below link:
+https://simplemaps.com/data/au-cities
+
 """
 
 ## Generate Random Datetime for a given Date Range
@@ -47,19 +50,23 @@ if option=='1':
     country = input("\n Please provide full country name (e.g. Australia):")
     
     year = input("\n Please provide year {e.g. 2014}:")
+    
+    
     if int(year) >= datetime.datetime.now().year: 
       print("The application is built to generate weather data for previous years and not forecast for current or future year")
       print("Existing application..")
       sys.exit()
-
+      
+    path = input("\n Please provide path of Country Database:")
     ## Obtain the list of cities for the country  
-    cities_list = ['Melbourne']
+    weather_data = open("weather_data_"+country+"_"+year+".dat", "w")
     
-    weather_data = open("weather_data_"+country+"_"+year+".dat", "w") 
-    for City in cities_list:
+    with open(glob.glob(path+country+"/*.csv")[0]) as fg:
+      next(fg)
+      for line in fg:
                
-        ## Traversing through the months of the specified year      
-        for i in range(1,13):
+          ## Traversing through the months of the specified year      
+          for i in range(1,13):
             
             ## Obtain Temperature range for a particular month of the year           
             for season_dtl,season_dtl_info in season_conditions.items():
@@ -71,8 +78,9 @@ if option=='1':
             for days in range(1,calendar.monthrange(int(year),i)[1]+1):
                 
                 ## Obtain lat,long and elevation for the City
-                Lat = 31
-                Lon = 154
+                City = line.split(",")[0]
+                Lat = line.split(",")[1]
+                Lon = line.split(",")[1]
                 elevation = 39
                 
                 ## Randomly generating pressure and humidity with pre-defined range  
