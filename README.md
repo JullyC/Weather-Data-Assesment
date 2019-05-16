@@ -17,7 +17,7 @@
                in the following location: $(USER_INPUT_PATH}/{USER_INPUT_COUNTRY}/
                For country cities database details refer to below link:
                https://simplemaps.com/data/au-cities
-            3. Perform Google API call to obtain elevation of the cities based on latitude and longitude
+            3. Perform Google API call(using Developer API KEY) to obtain elevation of the cities based on latitude and longitude
             4. Generates temperature as per month to season applicability across majority 
                countries(not all)
                e.g. Jan - Winter - Temp range - (-5,-15)
@@ -40,7 +40,7 @@
             
             1. This segment generated weather data for every latitude and longitude from the
                tif files located in the path ${USER_INPUT_PATH}
-            2. Perform Google API call to obtain elevation of the cities based on latitude and longitude
+            2. Perform Google API call(using Developer API KEY) to obtain elevation of the cities based on latitude and longitude
             3. Generates temperature as per month to season applicability across majority 
                countries(not all)
             4. Pressure and humidty are generated per min and max recorded value around the world
