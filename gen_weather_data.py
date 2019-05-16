@@ -122,7 +122,7 @@ elif option=='2':
     # Function to convert pixel row/column index (from 0) to easting/northing at centre
     rc2en = lambda r, c: (c, r) * T1
 
-    # Based on the size of the data this will take some time TODO: Need to parallelize the process
+    
     eastings, northings = np.vectorize(rc2en, otypes=[np.float, np.float])(rows, cols)
 
     # Project all longitudes, latitudes
@@ -131,7 +131,7 @@ elif option=='2':
     image_flname=img_file.split(".")[0]
     weather_data = open(image_flname+"_weather_data.dat", "w") 
 
-    # Sample data is generate in a sequential process. TODO: Need to parallelize the process
+   
     for r in range(0, len(longs)):
         s_long = longs[r]
         s_lats = lats[r]
