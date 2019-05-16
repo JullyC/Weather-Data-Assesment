@@ -1,0 +1,5 @@
+# Weather parameter:Max value:Min Value
+Pressure:700:1000
+Humidity:1:100
+# For Geo based parameter:start time:start time(YYYY-MM-DD) 
+Time_range:2013-01-01:2018-12-31:%Y-%m-%d
